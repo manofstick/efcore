@@ -761,7 +761,7 @@ public sealed partial class SelectExpression
                 var limit = (SqlExpression?)Visit(selectExpression.Limit);
 
                 var newSelectExpression = new SelectExpression(
-                    selectExpression.Alias, newProjections, newTables, newTableReferences, newGroupBy, newOrderings)
+                    selectExpression.Alias, newProjections, newTables, newTableReferences, newGroupBy, newOrderings, selectExpression.GetAnnotations())
                 {
                     Predicate = predicate,
                     Having = havingExpression,

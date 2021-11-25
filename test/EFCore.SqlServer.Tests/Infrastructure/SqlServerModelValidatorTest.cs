@@ -705,21 +705,37 @@ public class SqlServerModelValidatorTest : RelationalModelValidatorTest
     }
 
     [ConditionalFact]
-    public void Temporal_period_property_must_non_nullable_datetime()
+    public void Temporal_period_property_must_be_non_nullable_datetime()
     {
         var modelBuilder1 = CreateConventionalModelBuilder();
         modelBuilder1.Entity<Dog>().Property(typeof(DateTime?), "Start");
-        modelBuilder1.Entity<Dog>().ToTable(tb => tb.IsTemporal(ttb => ttb.HasPeriodStart("Start")));
 
-        VerifyError(
-            SqlServerStrings.TemporalPeriodPropertyMustBeNonNullableDateTime(nameof(Dog), "Start", nameof(DateTime)), modelBuilder1);
+        //modelBuilder1.Entity<Dog>().ToTable(tb => tb.IsTemporal(ttb => ttb.HasPeriodStart("Start")));
+
+        //VerifyError(
+        //    SqlServerStrings.TemporalPeriodPropertyMustBeNonNullableDateTime(nameof(Dog), "Start", nameof(DateTime)), modelBuilder1);
+
+        var message1 = Assert.Throws<InvalidOperationException>(
+            () => modelBuilder1.Entity<Dog>().ToTable(tb => tb.IsTemporal(ttb => ttb.HasPeriodStart("Start")))).Message;
+
+        Assert.Equal(
+            SqlServerStrings.TemporalPeriodPropertyMustBeNonNullableDateTime(nameof(Dog), "Start", nameof(DateTime)),
+            message1);
 
         var modelBuilder2 = CreateConventionalModelBuilder();
         modelBuilder2.Entity<Dog>().Property(typeof(int), "Start");
-        modelBuilder2.Entity<Dog>().ToTable(tb => tb.IsTemporal(ttb => ttb.HasPeriodStart("Start")));
 
-        VerifyError(
-            SqlServerStrings.TemporalPeriodPropertyMustBeNonNullableDateTime(nameof(Dog), "Start", nameof(DateTime)), modelBuilder2);
+        //modelBuilder2.Entity<Dog>().ToTable(tb => tb.IsTemporal(ttb => ttb.HasPeriodStart("Start")));
+
+        //VerifyError(
+        //    SqlServerStrings.TemporalPeriodPropertyMustBeNonNullableDateTime(nameof(Dog), "Start", nameof(DateTime)), modelBuilder2);
+
+        var message2 = Assert.Throws<InvalidOperationException>(
+            () => modelBuilder1.Entity<Dog>().ToTable(tb => tb.IsTemporal(ttb => ttb.HasPeriodStart("Start")))).Message;
+
+        Assert.Equal(
+            SqlServerStrings.TemporalPeriodPropertyMustBeNonNullableDateTime(nameof(Dog), "Start", nameof(DateTime)),
+            message2);
     }
 
     [ConditionalFact]
@@ -781,14 +797,25 @@ public class SqlServerModelValidatorTest : RelationalModelValidatorTest
     }
 
     [ConditionalFact]
-    public void Temporal_doesnt_work_on_table_splitting()
+    public void Temporal_doesnt_work_on_table_splitting_with_inconsistent_period_mappings()
     {
         var modelBuilder = CreateConventionalModelBuilder();
         modelBuilder.Entity<Splitting1>().ToTable("Splitting", tb => tb.IsTemporal());
         modelBuilder.Entity<Splitting2>().ToTable("Splitting", tb => tb.IsTemporal());
         modelBuilder.Entity<Splitting1>().HasOne(x => x.Details).WithOne().HasForeignKey<Splitting2>(x => x.Id);
 
-        VerifyError(SqlServerStrings.TemporalNotSupportedForTableSplitting("Splitting"), modelBuilder);
+        VerifyError(SqlServerStrings.TemporalNotSupportedForTableSplittingWithInconsistentPeriodMapping("start", "Splitting2", "PeriodStart", "Splitting2_PeriodStart", "PeriodStart"), modelBuilder);
+    }
+
+    [ConditionalFact]
+    public void Temporal_doesnt_work_on_table_splitting_when_some_types_are_temporal_and_some_are_not()
+    {
+        var modelBuilder = CreateConventionalModelBuilder();
+        modelBuilder.Entity<Splitting1>().ToTable("Splitting");
+        modelBuilder.Entity<Splitting2>().ToTable("Splitting", tb => tb.IsTemporal());
+        modelBuilder.Entity<Splitting1>().HasOne(x => x.Details).WithOne().HasForeignKey<Splitting2>(x => x.Id);
+
+        VerifyError(SqlServerStrings.TemporalAllEntitiesMappedToSameTableMustBeTemporal("Splitting1"), modelBuilder);
     }
 
     public class Human
