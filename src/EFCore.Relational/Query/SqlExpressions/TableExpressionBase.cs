@@ -40,6 +40,36 @@ public abstract class TableExpressionBase : Expression, IPrintableExpression, IS
     public sealed override ExpressionType NodeType
         => ExpressionType.Extension;
 
+
+
+    /// <summary>
+    ///     Gets the value annotation with the given name, returning <see langword="null" /> if it does not exist.
+    /// </summary>
+    /// <param name="name">The key of the annotation to find.</param>
+    /// <returns>
+    ///     The value of the existing annotation if an annotation with the specified name already exists.
+    ///     Otherwise, <see langword="null" />.
+    /// </returns>
+    public virtual object? this[string name]
+    {
+        get => FindAnnotation(name)?.Value;
+
+        set
+        {
+            Check.NotEmpty(name, nameof(name));
+
+            if (value == null)
+            {
+                RemoveAnnotation(name);
+            }
+            else
+            {
+                SetAnnotation(name, value);
+            }
+        }
+    }
+
+
     public object? this[string name] => throw new NotImplementedException();
 
     /// <summary>
