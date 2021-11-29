@@ -12,7 +12,7 @@ namespace Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 ///         not used in application code.
 ///     </para>
 /// </summary>
-public abstract class TableExpressionBase : Expression, IPrintableExpression
+public abstract class TableExpressionBase : Expression, IPrintableExpression, ISqlExpressionAnnotatable
 {
     /// <summary>
     ///     Creates a new instance of the <see cref="TableExpressionBase" /> class.
@@ -40,6 +40,8 @@ public abstract class TableExpressionBase : Expression, IPrintableExpression
     public sealed override ExpressionType NodeType
         => ExpressionType.Extension;
 
+    public object? this[string name] => throw new NotImplementedException();
+
     /// <summary>
     ///     Creates a printable string representation of the given expression using <see cref="ExpressionPrinter" />.
     /// </summary>
@@ -63,4 +65,14 @@ public abstract class TableExpressionBase : Expression, IPrintableExpression
     /// <inheritdoc />
     public override int GetHashCode()
         => HashCode.Combine(Alias);
+
+    public ISqlExpressionAnnotation? FindAnnotation(string name)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IEnumerable<ISqlExpressionAnnotation> GetAnnotations()
+    {
+        throw new NotImplementedException();
+    }
 }
