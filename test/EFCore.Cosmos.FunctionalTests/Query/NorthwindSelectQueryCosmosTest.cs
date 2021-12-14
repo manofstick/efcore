@@ -1269,6 +1269,10 @@ ORDER BY c[""OrderID""]");
         Assert.Equal(CosmosStrings.ReverseAfterSkipTakeNotSupported, message);
     }
 
+    [ConditionalTheory(Skip = "Issue #17246")]
+    public override Task Using_enumerable_parameter_in_projection(bool async)
+        => base.Using_enumerable_parameter_in_projection(async);
+
     private void AssertSql(params string[] expected)
         => Fixture.TestSqlLoggerFactory.AssertBaseline(expected);
 
